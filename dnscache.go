@@ -21,6 +21,8 @@ type Resolver struct {
 	// Resolver is used to perform actual DNS lookup. If nil,
 	// net.DefaultResolver is used instead.
 	Resolver DNSResolver
+	
+	CacheFailures bool
 
 	once  sync.Once
 	mu    sync.RWMutex
@@ -126,9 +128,11 @@ func (r *Resolver) update(ctx context.Context, key string, used bool) (rrs []str
 		if err == nil {
 			rrs, _ = res.Val.([]string)
 		}
-		r.mu.Lock()
-		r.storeLocked(key, rrs, used, err)
-		r.mu.Unlock()
+		if !r.CacheFailures || err == nil {
+			r.mu.Lock()
+			r.storeLocked(key, rrs, used, err)
+			r.mu.Unlock()
+		}
 	}
 	return
 }
