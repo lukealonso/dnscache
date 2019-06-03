@@ -22,7 +22,7 @@ type Resolver struct {
 	// net.DefaultResolver is used instead.
 	Resolver DNSResolver
 	
-	CacheFailures bool
+	NoCacheFailures bool
 
 	once  sync.Once
 	mu    sync.RWMutex
@@ -128,7 +128,7 @@ func (r *Resolver) update(ctx context.Context, key string, used bool) (rrs []str
 		if err == nil {
 			rrs, _ = res.Val.([]string)
 		}
-		if !r.CacheFailures || err == nil {
+		if !r.NoCacheFailures || err == nil {
 			r.mu.Lock()
 			r.storeLocked(key, rrs, used, err)
 			r.mu.Unlock()
